@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integer Battle with Pets 🐾</title>
+  <style>
+    :root { --card: rgba(255,255,255,0.1); --shadow: 0 8px 20px rgba(0,0,0,0.35); }
+    body {
+      margin: 0; display: flex; align-items: center; justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .game-container {
+      width: 440px; max-width: 94vw; padding: 24px; border-radius: 20px;
+      background: var(--card); backdrop-filter: blur(10px); box-shadow: var(--shadow);
+      text-align: center;
+    }
+    h1 { margin: 0 0 10px; font-size: 28px; text-shadow: 1px 1px 5px rgba(0,0,0,.5); }
+    .subtitle { font-size: 12px; opacity: .9; margin-bottom: 12px; }
+    #question {
+      background: rgba(255,255,255,.2); border-radius: 14px; padding: 18px; margin: 16px 0;
+      font-size: 28px; font-weight: 800;
+      box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    }
+    .pets { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 16px; }
+    .pet {
+      width: 120px; height: 120px; border-radius: 14px; background: rgba(255,255,255,0.15);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform .2s ease, background .3s;
+    }
+    .pet img { width: 60px; height: 60px; margin-bottom: 6px; }
+    .pet span { font-size: 18px; font-weight: bold; }
+    .pet:hover { transform: translateY(-5px); }
+    .correct { background: #2ecc71 !important; }
+    .wrong { background: #e74c3c !important; }
+    #feedback { margin-top: 14px; font-size: 20px; font-weight: bold; min-height: 28px; }
+    .score { margin-top: 12px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🐾 Pet Math Battle</h1>
+    <div class="subtitle">Choose the correct pet with the right answer!</div>
+
+    <div id="question">Press Start to Begin!</div>
+    <div class="pets" id="pets"></div>
+
+    <div id="feedback"></div>
+    <div class="score">Score: <span id="score">0</span> out of <span id="total">0</span></div>
+
+    <button id="nextBtn" style="margin-top:14px;padding:10px 16px;border:none;border-radius:12px;
+      background:#1dd1a1;color:#0c2a1f;font-weight:700;cursor:pointer;">
+      Start / Next
+    </button>
+  </div>
+
+<script>
+  let score = 0, total = 0;
+  let correctAnswer = null;
+
+  const pets = [
+    "https://cdn-icons-png.flaticon.com/512/616/616408.png", // dog
+    "https://cdn-icons-png.flaticon.com/512/616/616430.png", // cat
+    "https://cdn-icons-png.flaticon.com/512/1998/1998627.png", // rabbit
+    "https://cdn-icons-png.flaticon.com/512/616/6164089.png"  // panda
+  ];
+
+  const messages = [
+    "🌟 Awesome! Keep it up!",
+    "🔥 Brilliant work!",
+    "🎉 You nailed it!",
+    "💪 Super strong move!",
+    "🚀 Great job, math wizard!",
+    "✨ Sharp thinking!",
+    "🏆 Champion move!"
+  ];
+
+  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function newQuestion() {
+    document.getElementById("feedback").textContent = "";
+    const a = rnd(1, 12);
+    const b = rnd(1, 12);
+    const ops = ['+', '-', '×'];
+    const op = ops[rnd(0, ops.length - 1)];
+    if (op === '+') correctAnswer = a + b;
+    if (op === '-') correctAnswer = a - b;
+    if (op === '×') correctAnswer = a * b;
+    document.getElementById("question").textContent = `Calculate: ${a} ${op} ${b}`;
+
+    // generate answers
+    let answers = [correctAnswer];
+    while (answers.length < 4) {
+      let wrong = rnd(-20, 100);
+      if (!answers.includes(wrong)) answers.push(wrong);
+    }
+    answers.sort(() => Math.random() - 0.5);
+
+    // display pets
+    const petsDiv = document.getElementById("pets");
+    petsDiv.innerHTML = "";
+    answers.forEach((ans, idx) => {
+      const div = document.createElement("div");
+      div.className = "pet";
+      div.innerHTML = `<img src="${pets[idx]}" alt="pet"><span>${ans}</span>`;
+      div.onclick = () => checkAnswer(div, ans);
+      petsDiv.appendChild(div);
+    });
+  }
+
+  function checkAnswer(div, ans) {
+    total++;
+    if (ans === correctAnswer) {
+      score++;
+      div.classList.add("correct");
+      document.getElementById("feedback").textContent = messages[rnd(0, messages.length-1)];
+    } else {
+      div.classList.add("wrong");
+      document.getElementById("feedback").textContent = `❌ The correct answer was ${correctAnswer}`;
+      [...document.getElementsByClassName("pet")].forEach(p => {
+        if (parseInt(p.querySelector("span").textContent) === correctAnswer) {
+          p.classList.add("correct");
+        }
+      });
+    }
+    document.getElementById("score").textContent = score;
+    document.getElementById("total").textContent = total;
+  }
+
+  document.getElementById("nextBtn").addEventListener("click", newQuestion);
+</script>
+</body>
+</html>
