@@ -1,135 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Integer Battle with Pets 🐾</title>
-  <style>
-    :root { --card: rgba(255,255,255,0.1); --shadow: 0 8px 20px rgba(0,0,0,0.35); }
-    body {
-      margin: 0; display: flex; align-items: center; justify-content: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .game-container {
-      width: 440px; max-width: 94vw; padding: 24px; border-radius: 20px;
-      background: var(--card); backdrop-filter: blur(10px); box-shadow: var(--shadow);
-      text-align: center;
-    }
-    h1 { margin: 0 0 10px; font-size: 28px; text-shadow: 1px 1px 5px rgba(0,0,0,.5); }
-    .subtitle { font-size: 12px; opacity: .9; margin-bottom: 12px; }
-    #question {
-      background: rgba(255,255,255,.2); border-radius: 14px; padding: 18px; margin: 16px 0;
-      font-size: 28px; font-weight: 800;
-      box-shadow: 0 4px 10px rgba(0,0,0,.3);
-    }
-    .pets { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 16px; }
-    .pet {
-      width: 120px; height: 120px; border-radius: 14px; background: rgba(255,255,255,0.15);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; transition: transform .2s ease, background .3s;
-    }
-    .pet img { width: 60px; height: 60px; margin-bottom: 6px; }
-    .pet span { font-size: 18px; font-weight: bold; }
-    .pet:hover { transform: translateY(-5px); }
-    .correct { background: #2ecc71 !important; }
-    .wrong { background: #e74c3c !important; }
-    #feedback { margin-top: 14px; font-size: 20px; font-weight: bold; min-height: 28px; }
-    .score { margin-top: 12px; font-size: 18px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pets Math Game</title>
+<style>
+body {
+  margin: 0; padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#1a1a1a,#0c0c0c);
+  color: #fff; text-align:center;
+}
+h1 { margin: 20px; font-size: 36px; color:#ffcc00; text-shadow:1px 1px 5px #000;}
+#question { font-size: 40px; margin:20px; color:#00e6e6; }
+#options { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin:20px; }
+.pet {
+  width: 120px; height:120px; cursor:pointer;
+  border-radius:12px; border:3px solid #fff;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.pet:hover { transform: scale(1.1); }
+.correct { border-color: #00ff00; }
+.wrong { border-color: #ff4444; opacity:0.6; }
+#feedback { font-size:28px; margin:20px; font-weight:bold; }
+#score { font-size:24px; margin:10px; color:#ffccff; }
+</style>
 </head>
 <body>
-  <div class="game-container">
-    <h1>🐾 Pet Math Battle</h1>
-    <div class="subtitle">Choose the correct pet with the right answer!</div>
-
-    <div id="question">Press Start to Begin!</div>
-    <div class="pets" id="pets"></div>
-
-    <div id="feedback"></div>
-    <div class="score">Score: <span id="score">0</span> out of <span id="total">0</span></div>
-
-    <button id="nextBtn" style="margin-top:14px;padding:10px 16px;border:none;border-radius:12px;
-      background:#1dd1a1;color:#0c2a1f;font-weight:700;cursor:pointer;">
-      Start / Next
-    </button>
-  </div>
+<h1>🐾 Pets Math Game 🐾</h1>
+<div id="score">Score: 0 out of 0</div>
+<div id="question"></div>
+<div id="options"></div>
+<div id="feedback"></div>
 
 <script>
-  let score = 0, total = 0;
-  let correctAnswer = null;
+// Pet images
+const pets = [
+  "https://placekitten.com/200/200",
+  "https://placedog.net/200/200?id=1",
+  "https://placebear.com/200/200",
+  "https://loremflickr.com/200/200/parrot",
+  "https://loremflickr.com/200/200/bunny",
+  "https://placekitten.com/201/201",
+  "https://placedog.net/201/201?id=2"
+];
 
-  const pets = [
-    "https://cdn-icons-png.flaticon.com/512/616/616408.png", // dog
-    "https://cdn-icons-png.flaticon.com/512/616/616430.png", // cat
-    "https://cdn-icons-png.flaticon.com/512/1998/1998627.png", // rabbit
-    "https://cdn-icons-png.flaticon.com/512/616/6164089.png"  // panda
-  ];
+let score = 0;
+let total = 0;
 
-  const messages = [
-    "🌟 Awesome! Keep it up!",
-    "🔥 Brilliant work!",
-    "🎉 You nailed it!",
-    "💪 Super strong move!",
-    "🚀 Great job, math wizard!",
-    "✨ Sharp thinking!",
-    "🏆 Champion move!"
-  ];
-
-  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-  function newQuestion() {
-    document.getElementById("feedback").textContent = "";
-    const a = rnd(1, 12);
-    const b = rnd(1, 12);
-    const ops = ['+', '-', '×'];
-    const op = ops[rnd(0, ops.length - 1)];
-    if (op === '+') correctAnswer = a + b;
-    if (op === '-') correctAnswer = a - b;
-    if (op === '×') correctAnswer = a * b;
-    document.getElementById("question").textContent = `Calculate: ${a} ${op} ${b}`;
-
-    // generate answers
-    let answers = [correctAnswer];
-    while (answers.length < 4) {
-      let wrong = rnd(-20, 100);
-      if (!answers.includes(wrong)) answers.push(wrong);
-    }
-    answers.sort(() => Math.random() - 0.5);
-
-    // display pets
-    const petsDiv = document.getElementById("pets");
-    petsDiv.innerHTML = "";
-    answers.forEach((ans, idx) => {
-      const div = document.createElement("div");
-      div.className = "pet";
-      div.innerHTML = `<img src="${pets[idx]}" alt="pet"><span>${ans}</span>`;
-      div.onclick = () => checkAnswer(div, ans);
-      petsDiv.appendChild(div);
-    });
+// Generate negative/positive subtraction questions
+function generateQuestion() {
+  let type = Math.floor(Math.random() * 5);
+  let a, b;
+  switch(type) {
+    case 0: a = rand(-10,-1); b = rand(-10,-1); break; // neg-neg
+    case 1: a = rand(-10,-1); b = rand(1,10); break;    // neg-pos
+    case 2: a = rand(1,10); b = rand(-10,-1); break;    // pos-neg
+    case 3: a = 0; b = rand(-10,10); break;            // 0-any
+    case 4: a = rand(-10,10); b = 0; break;            // any-0
   }
+  let answer = a - b;
+  return {text:`${a} - ${b}`, answer};
+}
 
-  function checkAnswer(div, ans) {
-    total++;
-    if (ans === correctAnswer) {
-      score++;
-      div.classList.add("correct");
-      document.getElementById("feedback").textContent = messages[rnd(0, messages.length-1)];
-    } else {
-      div.classList.add("wrong");
-      document.getElementById("feedback").textContent = `❌ The correct answer was ${correctAnswer}`;
-      [...document.getElementsByClassName("pet")].forEach(p => {
-        if (parseInt(p.querySelector("span").textContent) === correctAnswer) {
-          p.classList.add("correct");
-        }
-      });
-    }
-    document.getElementById("score").textContent = score;
-    document.getElementById("total").textContent = total;
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function loadQuestion() {
+  const {text, answer} = generateQuestion();
+  document.getElementById("question").innerText = text;
+
+  let optionsSet = new Set([answer]);
+  while(optionsSet.size < 4) optionsSet.add(answer + rand(-5,5) || 1);
+  let options = Array.from(optionsSet).sort(()=>Math.random()-0.5);
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  options.forEach(opt=>{
+    let img = document.createElement("img");
+    img.src = pets[Math.floor(Math.random()*pets.length)];
+    img.classList.add("pet");
+    img.setAttribute("data-value", opt);
+    img.onclick = ()=>checkAnswer(img, opt, answer);
+    optionsDiv.appendChild(img);
+  });
+
+  document.getElementById("feedback").innerText = "";
+}
+
+function checkAnswer(img, selected, correct) {
+  total++;
+  if(selected === correct){
+    score++;
+    img.classList.add("correct");
+    document.getElementById("feedback").innerText = "🎉 Awesome! Correct!";
+  } else {
+    img.classList.add("wrong");
+    document.getElementById("feedback").innerText = `❌ Wrong! Correct: ${correct}`;
   }
+  document.getElementById("score").innerText = `Score: ${score} out of ${total}`;
 
-  document.getElementById("nextBtn").addEventListener("click", newQuestion);
+  // Next question automatically after 1.5 sec
+  setTimeout(loadQuestion,1500);
+}
+
+// Start game
+loadQuestion();
 </script>
 </body>
+</html>
+
 </html>
