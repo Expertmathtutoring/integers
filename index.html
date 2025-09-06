@@ -10,6 +10,7 @@
       font-family: 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
       padding: 20px;
+      overflow: hidden;
     }
     h1 {
       font-size: 2.5em;
@@ -25,6 +26,7 @@
       justify-content: center;
       gap: 15px;
       margin: 20px 0;
+      flex-wrap: wrap;
     }
     .option {
       background: #444;
@@ -35,6 +37,7 @@
       padding: 15px 30px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
     }
     .option:hover {
       background: #ffcc00;
@@ -62,6 +65,19 @@
       height: 200px;
       margin-top: 20px;
     }
+    .spark {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.95;
+      animation: explode 2.4s forwards;
+    }
+    @keyframes explode {
+      from { transform: translate(0,0) scale(1); opacity:1; }
+      to   { transform: translate(var(--x), var(--y)) scale(0.2); opacity:0; }
+    }
   </style>
 </head>
 <body>
@@ -88,12 +104,12 @@
     ];
 
     const petImages = [
-      "https://cdn-icons-png.flaticon.com/512/616/616408.png", // Dog cartoon
-      "https://cdn-icons-png.flaticon.com/512/616/616430.png", // Cat cartoon
-      "https://cdn-icons-png.flaticon.com/512/616/616408.png", // Dog again
-      "https://cdn-icons-png.flaticon.com/512/1998/1998592.png", // Bunny cartoon
-      "https://cdn-icons-png.flaticon.com/512/616/616408.png", // Dog repeat
-      "https://cdn-icons-png.flaticon.com/512/616/616408.png", // etc
+      "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+      "https://cdn-icons-png.flaticon.com/512/616/616430.png",
+      "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+      "https://cdn-icons-png.flaticon.com/512/1998/1998592.png",
+      "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+      "https://cdn-icons-png.flaticon.com/512/616/616408.png",
       "https://cdn-icons-png.flaticon.com/512/616/616430.png",
       "https://cdn-icons-png.flaticon.com/512/616/616408.png",
       "https://cdn-icons-png.flaticon.com/512/616/616430.png",
@@ -142,6 +158,7 @@
         score++;
         btn.classList.add("correct");
         document.getElementById("feedback").innerText = "🌟 Great job! Correct!";
+        launchFireworks(btn); // Fireworks on correct answer
       } else {
         btn.classList.add("wrong");
         document.getElementById("feedback").innerText = `❌ Oops! Correct answer: ${correct}`;
@@ -151,10 +168,31 @@
       setTimeout(loadQuestion, 1200);
     }
 
+    function launchFireworks(target) {
+      const rect = target.getBoundingClientRect();
+      const centerX = rect.left + rect.width/2;
+      const centerY = rect.top + rect.height/2;
+
+      for(let i=0; i<200; i++){ // more sparks
+        const spark = document.createElement('div');
+        spark.className='spark';
+        const angle = Math.random()*2*Math.PI;
+        const dist = Math.random()*150 + 50; // bigger spread
+        spark.style.setProperty('--x', `${Math.cos(angle)*dist}px`);
+        spark.style.setProperty('--y', `${Math.sin(angle)*dist}px`);
+        spark.style.left = centerX + 'px';
+        spark.style.top = centerY + 'px';
+        spark.style.background = `hsl(${Math.random()*360}, 100%, 60%)`;
+        document.body.appendChild(spark);
+        setTimeout(()=>spark.remove(), 2500);
+      }
+    }
+
     loadQuestion();
   </script>
 </body>
 </html>
+
 
 
 
