@@ -11,6 +11,7 @@
       text-align: center;
       padding: 20px;
       overflow: hidden;
+      position: relative;
     }
     h1 {
       font-size: 2.5em;
@@ -65,6 +66,24 @@
       height: 200px;
       margin-top: 20px;
     }
+    button#restartBtn {
+      padding: 10px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: #ff9800;
+      color: white;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+    button#restartBtn:hover {
+      background: #e68900;
+    }
     .spark {
       position: absolute;
       width: 20px;
@@ -87,6 +106,8 @@
   <div id="feedback"></div>
   <div id="score">Score: 0</div>
   <img id="petImage" src="" alt="Cartoon Pet">
+
+  <button id="restartBtn">🔄 Restart</button>
 
   <script>
     const questions = [
@@ -132,6 +153,7 @@
       const q = questions[current];
       document.getElementById("question").innerText = `Q${current+1}: ${q.q} = ?`;
       document.getElementById("petImage").src = petImages[current];
+      document.getElementById("petImage").style.display = "block";
 
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
@@ -158,7 +180,7 @@
         score++;
         btn.classList.add("correct");
         document.getElementById("feedback").innerText = "🌟 Great job! Correct!";
-        launchFireworks(btn); // Fireworks on correct answer
+        launchFireworks(btn);
       } else {
         btn.classList.add("wrong");
         document.getElementById("feedback").innerText = `❌ Oops! Correct answer: ${correct}`;
@@ -173,11 +195,11 @@
       const centerX = rect.left + rect.width/2;
       const centerY = rect.top + rect.height/2;
 
-      for(let i=0; i<200; i++){ // more sparks
+      for(let i=0; i<200; i++){
         const spark = document.createElement('div');
         spark.className='spark';
         const angle = Math.random()*2*Math.PI;
-        const dist = Math.random()*150 + 50; // bigger spread
+        const dist = Math.random()*150 + 50;
         spark.style.setProperty('--x', `${Math.cos(angle)*dist}px`);
         spark.style.setProperty('--y', `${Math.sin(angle)*dist}px`);
         spark.style.left = centerX + 'px';
@@ -188,10 +210,20 @@
       }
     }
 
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      current = 0;
+      score = 0;
+      document.getElementById("score").innerText = `Score: ${score}`;
+      document.getElementById("feedback").innerText = '';
+      document.getElementById("petImage").style.display = "block";
+      loadQuestion();
+    });
+
     loadQuestion();
   </script>
 </body>
 </html>
+
 
 
 
